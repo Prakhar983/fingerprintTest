@@ -1,0 +1,132 @@
+<!-- index.html: Composite Fingerprint demo with generation **and** manual ID/JSON comparison -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Composite Fingerprint Demo</title>
+    <style>
+      body { font-family: Arial, Helvetica, sans-serif; margin: 2rem; line-height: 1.5; }
+      h1 { margin-bottom: 1rem; }
+      button { margin-right: 1rem; margin-bottom: 1rem; padding: 0.6rem 1rem; font-size: 1rem; border: 1px solid #333; border-radius: 6px; background: #f3f3f3; cursor: pointer; }
+      pre, textarea { background: #f7f7f7; padding: 1rem; border-radius: 6px; overflow-x: auto; width: 100%; box-sizing: border-box; }
+      textarea { height: 120px; resize: vertical; }
+      .section { margin-bottom: 2rem; }
+      label { font-weight: bold; display: block; margin-bottom: 0.5rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Composite Fingerprint Demo</h1>
+
+    <!-- -------------------------------------------------- -->
+    <!-- Automatic baseline / new generation & compare      -->
+    <!-- -------------------------------------------------- -->
+    <div class="section">
+      <button id="baselineBtn">Generate &amp; Store Baseline</button>
+      <button id="compareBtn">Generate &amp; Compare</button>
+    </div>
+
+    <div class="section">
+      <h2>Baseline Fingerprint</h2>
+      <pre id="baselineOutput">No baseline generated yet.</pre>
+    </div>
+
+    <div class="section">
+      <h2>New Fingerprint</h2>
+      <pre id="newOutput">No fingerprint generated yet.</pre>
+    </div>
+
+    <div class="section">
+      <h2>Similarity Score (Auto Compare)</h2>
+      <pre id="similarityOutput">N/A</pre>
+    </div>
+
+    <!-- -------------------------------------------------- -->
+    <!-- Manual ID/JSON comparison                           -->
+    <!-- -------------------------------------------------- -->
+    <div class="section">
+      <h2>Manual Compare Two Fingerprints</h2>
+      <label for="fpA">Fingerprint A (JSON or ID)</label>
+      <textarea id="fpA" placeholder="Paste full JSON or just the fingerprint ID..."></textarea>
+
+      <label for="fpB" style="margin-top:1rem;">Fingerprint B (JSON or ID)</label>
+      <textarea id="fpB" placeholder="Paste full JSON or just the fingerprint ID..."></textarea>
+
+      <button id="manualCompareBtn" style="margin-top:1rem;">Compare Inputs</button>
+    </div>
+
+    <div class="section">
+      <h2>Manual Compare Result</h2>
+      <pre id="manualCompareOutput">No comparison run yet.</pre>
+    </div>
+
+    <!-- Composite fingerprint library -->
+    <script src="./compositeFingerprint.js"></script>
+
+    <script>
+      /** Utility to pretty‑print a fingerprint object */
+      const printFP = (fp) => `Fingerprint ID: ${fp.id}\n\n` + (fp.components ? JSON.stringify(fp.components, null, 2) : '(no components)');
+
+      /* ---------- Automatic baseline / new generation ---------- */
+      let baselineFP = null;
+      const baselineBtn = document.getElementById('baselineBtn');
+      const compareBtn  = document.getElementById('compareBtn');
+      const baselineOutput   = document.getElementById('baselineOutput');
+      const newOutput        = document.getElementById('newOutput');
+      const similarityOutput = document.getElementById('similarityOutput');
+
+      baselineBtn.addEventListener('click', async () => {
+        baselineOutput.textContent = 'Generating baseline…';
+        baselineFP = await CompositeFingerprint.generate();
+        baselineOutput.textContent = printFP(baselineFP);
+        newOutput.textContent = 'No fingerprint generated yet.';
+        similarityOutput.textContent = 'N/A';
+        console.log('Baseline FP:', baselineFP);
+      });
+
+      compareBtn.addEventListener('click', async () => {
+        if (!baselineFP) { alert('Please generate a baseline fingerprint first.'); return; }
+        newOutput.textContent = 'Generating new fingerprint…';
+        const newFP = await CompositeFingerprint.generate();
+        newOutput.textContent = printFP(newFP);
+        const score = CompositeFingerprint.compare(baselineFP, newFP);
+        similarityOutput.textContent = `Similarity Score: ${score}`;
+        console.log('New FP:', newFP); console.log('Similarity Score:', score);
+      });
+
+      /* ---------- Manual ID / JSON comparison ---------- */
+      const fpAInput = document.getElementById('fpA');
+      const fpBInput = document.getElementById('fpB');
+      const manualCompareBtn = document.getElementById('manualCompareBtn');
+      const manualCompareOutput = document.getElementById('manualCompareOutput');
+
+      // Helper to parse input into a FP‑like object
+      const parseInput = (str) => {
+        str = str.trim();
+        if (!str) return null;
+        // Try JSON parse first
+        try {
+          const obj = JSON.parse(str);
+          if (obj.id && obj.components) return obj;
+        } catch (_) {/* fallthrough */}
+        // Treat as plain ID string
+        return { id: str, components: null };
+      };
+
+      manualCompareBtn.addEventListener('click', () => {
+        const fpA = parseInput(fpAInput.value);
+        const fpB = parseInput(fpBInput.value);
+        if (!fpA || !fpB) { alert('Both inputs must be non‑empty.'); return; }
+
+        // If both have components, use full compare; otherwise compare IDs only.
+        let score;
+        if (fpA.components && fpB.components) {
+          score = CompositeFingerprint.compare(fpA, fpB);
+        } else {
+          score = fpA.id === fpB.id ? 1 : 0;
+        }
+        manualCompareOutput.textContent = `Similarity Score: ${score}`;
+      });
+    </script>
+  </body>
+</html>

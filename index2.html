@@ -1,0 +1,29 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fingerprint demo</title>
+  </head>
+  <body>
+    <h1>Composite Fingerprint</h1>
+    <pre id="output">Generating…</pre>
+
+    <!-- ① Drop the JS file in the same folder and load it -->
+    <script src="compositeFingerprint.js"></script>
+
+    <!-- ② Call the API -->
+    <script>
+      (async () => {
+        const fp = await CompositeFingerprint.generate();
+        document.getElementById('output').textContent =
+          `Fingerprint ID: ${fp.id}\n\n` +
+          JSON.stringify(fp.components, null, 2);
+
+        // Everything is also in the console
+        console.log('Fingerprint ID:', fp.id);
+        console.log('Components:', fp.components);
+      })();
+    </script>
+  </body>
+</html>

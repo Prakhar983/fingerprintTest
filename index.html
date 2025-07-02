@@ -6,80 +6,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Composite Fingerprint Demo</title>
 
-    <style>
-      :root {
-        --gap: 1rem;
-      }
+<style>
+  :root {
+    --gap: 1rem;
+  }
 
-      /* ---------- Base styles ---------- */
-      body {
-        font-family: Arial, Helvetica, sans-serif;
-        margin: 2rem;
-        line-height: 1.5;
-      }
-      h1 {
-        margin-bottom: var(--gap);
-      }
-      button {
-        margin-right: var(--gap);
-        margin-bottom: var(--gap);
-        padding: 0.6rem 1rem;
-        font-size: 1rem;
-        border: 1px solid #333;
-        border-radius: 6px;
-        background: #f3f3f3;
-        cursor: pointer;
-      }
-      button.copyBtn {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.9rem;
-      }
-      pre,
-      textarea {
-        background: #f7f7f7;
-        padding: 1rem;
-        border-radius: 6px;
-        overflow-x: auto;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      textarea {
-        height: 120px;
-        resize: vertical;
-      }
-      .section {
-        margin-bottom: 2rem;
-      }
-      label {
-        font-weight: bold;
-        display: block;
-        margin-bottom: 0.5rem;
-      }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 2rem;
+    line-height: 1.5;
+  }
+  h1 {
+    margin-bottom: var(--gap);
+  }
+  button {
+    margin-right: var(--gap);
+    margin-bottom: var(--gap);
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #333;
+    border-radius: 6px;
+    background: #f3f3f3;
+    cursor: pointer;
+  }
+  button.copyBtn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+  pre,
+  textarea {
+    background: #f7f7f7;
+    padding: 1rem;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: pre-wrap;        /* Enable wrapping for long text */
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    overflow-x: hidden;           /* Prevent horizontal scroll */
+  }
+  textarea {
+    height: 120px;
+    resize: vertical;
+  }
+  .section {
+    margin-bottom: 2rem;
+  }
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
 
-      /* ---------- Mobile optimisation ---------- */
-      @media (max-width: 600px) {
-        body {
-          margin: 1rem;
-          font-size: 0.95rem;
-        }
-        button {
-          width: 100%;
-          margin-right: 0;
-        }
-        button.copyBtn {
-          width: auto;
-          float: right;
-          margin-left: 0.5rem;
-        }
-        h1 {
-          font-size: 1.4rem;
-        }
-        pre,
-        textarea {
-          font-size: 0.85rem;
-        }
-      }
-    </style>
+  @media (max-width: 600px) {
+    body {
+      margin: 1rem;
+      font-size: 0.95rem;
+    }
+    button {
+      width: 100%;
+      margin-right: 0;
+    }
+    button.copyBtn {
+      width: auto;
+      float: right;
+      margin-left: 0.5rem;
+    }
+    h1 {
+      font-size: 1.4rem;
+    }
+    pre,
+    textarea {
+      font-size: 0.85rem;
+    }
+  }
+</style>
+
   </head>
   <body>
     <h1>Composite Fingerprint Demo</h1>

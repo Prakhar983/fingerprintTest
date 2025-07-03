@@ -61,18 +61,26 @@ const CompositeFingerprint = (() => {
 
     try {
       const db = indexedDB.open('fp-test');
-      db.onerror = () => resolve(true);
+      db.onerror = () => resolve(true); // Older Safari throws here
       db.onsuccess = () => {
+        if (typeof navigator.storage?.estimate !== 'function') {
+          // Storage API unsupported → assume NOT private
+          resolve(false);
+          return;
+        }
+
         navigator.storage.estimate()
           .then(({ quota }) => resolve(quota && quota < 150_000_000))
           .catch(() => resolve(false));
+
         db.result.close();
         indexedDB.deleteDatabase('fp-test');
       };
     } catch {
-      resolve(true);
+      resolve(true); // Fallback if open throws
     }
   });
+
 
   const getAudioHash = async () => {
     if (!isBrowser) return 'unavailable';

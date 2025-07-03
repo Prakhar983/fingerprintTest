@@ -39,6 +39,41 @@ const CompositeFingerprint = (() => {
   };
 
   /**************** COMPONENT COLLECTORS ****************/
+  // 🅰️ Generate a stable salt in Normal mode, new one in Private
+  const getStorageSalt = () => {
+    if (!isBrowser) return 'unavailable';
+    try {
+      const KEY = '__fp_salt_v1';
+      let salt = localStorage.getItem(KEY);
+      if (!salt) {
+        salt = crypto.getRandomValues(new Uint32Array(4)).join('-');
+        localStorage.setItem(KEY, salt);
+      }
+      return salt;
+    } catch {
+      return 'unavailable';
+    }
+  };
+
+  // 🅱️ Detect Safari Private Mode based on storage quota (≈ 50 MB)
+  const detectPrivateMode = () => new Promise(resolve => {
+    if (!isBrowser || !indexedDB) return resolve(false);
+
+    try {
+      const db = indexedDB.open('fp-test');
+      db.onerror = () => resolve(true);
+      db.onsuccess = () => {
+        navigator.storage.estimate()
+          .then(({ quota }) => resolve(quota && quota < 150_000_000))
+          .catch(() => resolve(false));
+        db.result.close();
+        indexedDB.deleteDatabase('fp-test');
+      };
+    } catch {
+      resolve(true);
+    }
+  });
+
   const getAudioHash = async () => {
     if (!isBrowser) return 'unavailable';
     try {
@@ -138,10 +173,23 @@ const CompositeFingerprint = (() => {
       getCanvasHash()
     ]);
 
-    const components = { audioHash, drmHash, canvasHash, deviceInfo: getDeviceInfo(), localeInfo: getLocaleInfo() };
+    const storageSalt = getStorageSalt();              // 🅰️ Get salt
+    const isPrivate = await detectPrivateMode();       // 🅱️ Detect Private Mode
+
+    const components = {
+      audioHash,
+      drmHash,
+      canvasHash,
+      storageSalt,             // 🅰️ Added to components
+      privateFlag: isPrivate,  // 🅱️ Added to components
+      deviceInfo: getDeviceInfo(),
+      localeInfo: getLocaleInfo()
+    };
+
     const id = await hashString(JSON.stringify(components));
     return { id, components };
   };
+
 
   /**
    * Compare two fingerprints or IDs.
